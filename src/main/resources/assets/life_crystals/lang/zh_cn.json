@@ -5,5 +5,5 @@
 	"item.life_crystals.life_crystal_shard": "生命水晶碎片",
 	"item_group.life_crystals.main_group": "生命水晶",
 
-	"life_crystals.limit_reached": "你的生命值已达到上限"
+	"life_crystals.limit_reached": "最大生命值已达到上限"
 }

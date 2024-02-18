@@ -103,30 +103,35 @@ public class LifeCrystals implements ModInitializer {
 			final HealthState state = HealthState.getServerState(world.getServer());
 
 			// Set player to base health if new player
-			if (!state.maxHealth.containsKey(player.getUuid())) {
+			if (!state.modifierIds.containsKey(player.getUuid())) {
 				final var health = Config.DATA.baseHealth();
 
-				// Update state
-				state.maxHealth.put(player.getUuid(), health);
-				state.markDirty();
-
-				player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).addPersistentModifier(
-						new EntityAttributeModifier(HEALTH_MODIFIER_NAME, health - 20,
-								Operation.ADDITION));
+				EntityAttributeModifier modifier = new EntityAttributeModifier(HEALTH_MODIFIER_NAME, health - 20,
+						Operation.ADDITION);
+				player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).addPersistentModifier(modifier);
 				player.setHealth(health);
+
+				// Save state
+				state.modifierIds.put(player.getUuid(), modifier.getId());
+				state.markDirty();
 			}
 		});
 
 		// Called when player respawns
 		ServerPlayerEvents.COPY_FROM.register(((oldPlayer, newPlayer, arg2) -> {
-			// Get state
-			final HealthState state = HealthState.getServerState(newPlayer.getServer());
+			// Get old modifier
+			final HealthState state = HealthState.getServerState(oldPlayer.getServer());
+			final var oldModifierId = state.modifierIds.get(oldPlayer.getUuid());
 
-			// Set player health
-			final int maxHealth = state.getMaxHealth(newPlayer);
-			newPlayer.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).addPersistentModifier(
-					new EntityAttributeModifier(HEALTH_MODIFIER_NAME, maxHealth - 20, Operation.ADDITION));
-			newPlayer.setHealth(maxHealth);
+			// Set new player modifier
+			if (oldModifierId != null) {
+				final var oldModifier = oldPlayer.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH)
+						.getModifier(oldModifierId);
+				int maxHealth = (int) oldModifier.getValue() + 20;
+
+				newPlayer.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).addPersistentModifier(oldModifier);
+				newPlayer.setHealth(maxHealth);
+			}
 		}));
 	}
 }

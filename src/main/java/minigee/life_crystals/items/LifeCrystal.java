@@ -1,5 +1,7 @@
 package minigee.life_crystals.items;
 
+import java.util.UUID;
+
 import minigee.life_crystals.Config;
 import minigee.life_crystals.HealthState;
 import minigee.life_crystals.LifeCrystals;
@@ -27,10 +29,15 @@ public class LifeCrystal extends Item {
 		final var stack = user.getStackInHand(hand);
 		if (world.isClient)
 			return TypedActionResult.fail(stack);
+			
+		// Increase hearts by adding an attribute modifier (so it doesn't interfere with
+		// other max health modifiers hopefully)
+		final var attr = user.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
 
-		// Get health state
+		// Get max health
 		final HealthState state = HealthState.getServerState(world.getServer());
-		int maxHealth = state.getMaxHealth(user);
+		final UUID oldModifierId = state.modifierIds.get(user.getUuid());
+		int maxHealth = oldModifierId != null ? (int) attr.getModifier(oldModifierId).getValue() + 20 : Config.DATA.baseHealth();
 
 		// Check if at max allowable health
 		if (maxHealth >= Config.DATA.maxHealth()) {
@@ -43,26 +50,21 @@ public class LifeCrystal extends Item {
 
 		// Decrement stack
 		stack.decrement(1);
+		
+		// Increment added health
+		int increment = Math.min(Config.DATA.healthIncrement(), Config.DATA.maxHealth() - maxHealth);
+		int newModifierVal = (int) attr.getModifier(oldModifierId).getValue() + increment;
 
-		// Increase hearts by adding an attribute modifier (so it doesn't interfere with
-		// other max health modifiers hopefully)
-		final var attr = user.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+		// Remove previous modifier
+		if (oldModifierId != null)
+			attr.removeModifier(oldModifierId);
 
-		// Remove all modifiers from this mod
-		final var modifiers = attr.getModifiers();
-		modifiers.forEach((modifier) -> {
-			if (modifier.getName() == LifeCrystals.HEALTH_MODIFIER_NAME)
-				attr.removeModifier(modifier.getId());
-		});
-
-		// Apply modifier as the difference between the target max health and the
-		// default max health
-		maxHealth += Config.DATA.healthIncrement();
-		attr.addPersistentModifier(
-				new EntityAttributeModifier(LifeCrystals.HEALTH_MODIFIER_NAME, maxHealth - 20, Operation.ADDITION));
+		// Apply new modifier value
+		EntityAttributeModifier modifier = new EntityAttributeModifier(LifeCrystals.HEALTH_MODIFIER_NAME, newModifierVal, Operation.ADDITION);
+		attr.addPersistentModifier(modifier);
 
 		// Save state
-		state.maxHealth.put(user.getUuid(), maxHealth);
+		state.modifierIds.put(user.getUuid(), modifier.getId());
 		state.markDirty();
 
 		return TypedActionResult.success(stack);

@@ -70,6 +70,6 @@ public class HealthState extends PersistentState {
 	 */
 	public Integer getMaxHealth(LivingEntity player) {
         // Either get the player by the uuid, or we don't have data for them yet so return default value
-        return maxHealth.computeIfAbsent(player.getUuid(), uuid -> Config.DATA.baseHealth());
+        return maxHealth.computeIfAbsent(player.getUuid(), uuid -> Config.DATA.baseHealth);
     }
 }

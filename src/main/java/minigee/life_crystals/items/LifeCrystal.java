@@ -33,7 +33,7 @@ public class LifeCrystal extends Item {
 		int maxHealth = state.getMaxHealth(user);
 
 		// Check if at max allowable health
-		if (maxHealth >= Config.DATA.maxHealth()) {
+		if (maxHealth >= Config.DATA.maxHealth) {
 			user.sendMessage(Text.translatable("life_crystals.limit_reached").formatted(Formatting.RED), true);
 			return TypedActionResult.fail(stack);
 		}
@@ -57,7 +57,7 @@ public class LifeCrystal extends Item {
 
 		// Apply modifier as the difference between the target max health and the
 		// default max health
-		maxHealth += Config.DATA.healthIncrement();
+		maxHealth += Config.DATA.healthIncrement;
 		attr.addPersistentModifier(
 				new EntityAttributeModifier(LifeCrystals.HEALTH_MODIFIER_NAME, maxHealth - 20, Operation.ADDITION));
 

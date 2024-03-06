@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
+import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Block;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
@@ -17,6 +18,16 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.loot.LootPool;
+import net.minecraft.loot.LootTables;
+import net.minecraft.loot.entry.ItemEntry;
+import net.minecraft.loot.function.LimitCountLootFunction;
+import net.minecraft.loot.function.LootFunction;
+import net.minecraft.loot.function.SetCountLootFunction;
+import net.minecraft.loot.provider.number.BinomialLootNumberProvider;
+import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
+import net.minecraft.loot.provider.number.UniformLootNumberProvider;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -26,6 +37,9 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 import net.minecraft.world.gen.GenerationStep;
 import net.minecraft.world.gen.feature.PlacedFeature;
+
+import java.util.List;
+
 import minigee.life_crystals.items.LifeCrystal;
 
 public class LifeCrystals implements ModInitializer {
@@ -63,6 +77,17 @@ public class LifeCrystals implements ModInitializer {
 				entries.add(DEEPSLATE_LIFE_CRYSTAL_ORE);
 			})
 			.build();
+
+	// Loot tables
+	final List<Identifier> LOOT_TABLE_IDS = List.of(
+			LootTables.ABANDONED_MINESHAFT_CHEST,
+			LootTables.ANCIENT_CITY_CHEST,
+			LootTables.BURIED_TREASURE_CHEST,
+			LootTables.DESERT_PYRAMID_CHEST,
+			LootTables.END_CITY_TREASURE_CHEST,
+			LootTables.JUNGLE_TEMPLE_CHEST,
+			LootTables.SIMPLE_DUNGEON_CHEST,
+			LootTables.WOODLAND_MANSION_CHEST);
 
 	@Override
 	public void onInitialize() {
@@ -104,7 +129,7 @@ public class LifeCrystals implements ModInitializer {
 
 			// Set player to base health if new player
 			if (!state.modifierIds.containsKey(player.getUuid())) {
-				final var health = Config.DATA.baseHealth();
+				final var health = Config.DATA.baseHealth;
 
 				EntityAttributeModifier modifier = new EntityAttributeModifier(HEALTH_MODIFIER_NAME, health - 20,
 						Operation.ADDITION);
@@ -133,5 +158,20 @@ public class LifeCrystals implements ModInitializer {
 				newPlayer.setHealth(maxHealth);
 			}
 		}));
+
+		// Add to loot tables
+		LootTableEvents.MODIFY.register((resourceManager, lootManager, id, tableBuilder, source) -> {
+			float lootChance = Config.DATA.lootChance;
+
+			if (source.isBuiltin() && Config.DATA.addChestLoot && LOOT_TABLE_IDS.contains(id)) {
+				LootPool.Builder poolBuilder = LootPool.builder()
+						.rolls(BinomialLootNumberProvider.create(1, lootChance))
+						.with(ItemEntry.builder(LIFE_CRYSTAL_SHARD).weight(4)
+								.apply(SetCountLootFunction.builder(UniformLootNumberProvider.create(1, 2))).build())
+						.with(ItemEntry.builder(LIFE_CRYSTAL).weight(1).build());
+
+				tableBuilder.pool(poolBuilder);
+			}
+		});
 	}
 }

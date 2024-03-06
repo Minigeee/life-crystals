@@ -37,10 +37,10 @@ public class LifeCrystal extends Item {
 		// Get max health
 		final HealthState state = HealthState.getServerState(world.getServer());
 		final UUID oldModifierId = state.modifierIds.get(user.getUuid());
-		int maxHealth = oldModifierId != null ? (int) attr.getModifier(oldModifierId).getValue() + 20 : Config.DATA.baseHealth();
+		int maxHealth = oldModifierId != null ? (int) attr.getModifier(oldModifierId).getValue() + 20 : Config.DATA.baseHealth;
 
 		// Check if at max allowable health
-		if (maxHealth >= Config.DATA.maxHealth()) {
+		if (maxHealth >= Config.DATA.maxHealth) {
 			user.sendMessage(Text.translatable("life_crystals.limit_reached").formatted(Formatting.RED), true);
 			return TypedActionResult.fail(stack);
 		}
@@ -52,7 +52,7 @@ public class LifeCrystal extends Item {
 		stack.decrement(1);
 		
 		// Increment added health
-		int increment = Math.min(Config.DATA.healthIncrement(), Config.DATA.maxHealth() - maxHealth);
+		int increment = Math.min(Config.DATA.healthIncrement, Config.DATA.maxHealth - maxHealth);
 		int newModifierVal = (int) attr.getModifier(oldModifierId).getValue() + increment;
 
 		// Remove previous modifier

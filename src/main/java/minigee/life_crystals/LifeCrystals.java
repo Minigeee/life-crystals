@@ -135,8 +135,8 @@ public class LifeCrystals implements ModInitializer {
 				state.maxHealth.put(player.getUuid(), health);
 				state.markDirty();
 
-				player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).addPersistentModifier(
-						new EntityAttributeModifier(HEALTH_MODIFIER_NAME, health - 20,
+				player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH)
+						.addPersistentModifier(new EntityAttributeModifier(HEALTH_MODIFIER_NAME, health - 20,
 								Operation.ADDITION));
 				player.setHealth(health);
 			}

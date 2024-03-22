@@ -51,7 +51,7 @@ public class LifeCrystal extends Item {
 		// Remove all modifiers from this mod
 		final var modifiers = attr.getModifiers();
 		modifiers.forEach((modifier) -> {
-			if (modifier.getName() == LifeCrystals.HEALTH_MODIFIER_NAME)
+			if (modifier.getName().equals(LifeCrystals.HEALTH_MODIFIER_NAME))
 				attr.removeModifier(modifier.getId());
 		});
 

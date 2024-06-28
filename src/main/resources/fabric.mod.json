@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 1,
-	"id": "life-crystals",
+	"id": "life_crystals",
 	"version": "${version}",
 	"name": "Life Crystals",
 	"description": "This is an example description! Tell everyone what your mod is about!",
@@ -12,7 +12,7 @@
 		"sources": "https://github.com/FabricMC/fabric-example-mod"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/life-crystals/icon.png",
+	"icon": "assets/life_crystals/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
@@ -20,22 +20,19 @@
 		],
 		"client": [
 			"minigee.life_crystals.LifeCrystalsClient"
-		],
-		"fabric-datagen": [
-			"minigee.life_crystals.LifeCrystalsDataGenerator"
 		]
 	},
 	"mixins": [
-		"life-crystals.mixins.json",
+		"life_crystals.mixins.json",
 		{
-			"config": "life-crystals.client.mixins.json",
+			"config": "life_crystals.client.mixins.json",
 			"environment": "client"
 		}
 	],
 	"depends": {
-		"fabricloader": ">=0.15.6",
-		"minecraft": "~1.20.1",
-		"java": ">=17",
+		"fabricloader": ">=0.15.11",
+		"minecraft": "~1.21",
+		"java": ">=21",
 		"fabric-api": "*"
 	},
 	"suggests": {

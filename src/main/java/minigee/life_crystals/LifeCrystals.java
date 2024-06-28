@@ -5,10 +5,8 @@ import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
-import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
-import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Block;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributeModifier.Operation;
@@ -20,6 +18,7 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.loot.LootPool;
+import net.minecraft.loot.LootTable;
 import net.minecraft.loot.LootTables;
 import net.minecraft.loot.entry.ItemEntry;
 import net.minecraft.loot.function.LimitCountLootFunction;
@@ -45,26 +44,26 @@ import minigee.life_crystals.items.LifeCrystal;
 public class LifeCrystals implements ModInitializer {
 	/** Mod id */
 	public static final String MOD_ID = "life_crystals";
-	/** Health modifier name */
-	public static final String HEALTH_MODIFIER_NAME = MOD_ID + ":HealthModifier";
+	/** Health modifier id */
+	public static final Identifier HEALTH_MODIFIER_ID = Identifier.of(MOD_ID, "health");
 
 	/** Life crystal shard */
-	public static final Item LIFE_CRYSTAL_SHARD = new Item(new FabricItemSettings().rarity(Rarity.UNCOMMON));
+	public static final Item LIFE_CRYSTAL_SHARD = new Item(new Item.Settings().rarity(Rarity.UNCOMMON));
 	/** Life crystal item */
-	public static final LifeCrystal LIFE_CRYSTAL = new LifeCrystal(new FabricItemSettings().rarity(Rarity.RARE));
+	public static final LifeCrystal LIFE_CRYSTAL = new LifeCrystal(new Item.Settings().rarity(Rarity.RARE));
 
 	/** Ore block */
-	public static final Block LIFE_CRYSTAL_ORE = new Block(FabricBlockSettings.create().strength(3.0f, 4.0f));
+	public static final Block LIFE_CRYSTAL_ORE = new Block(Block.Settings.create().strength(3.0f, 4.0f));
 	/** Deepslate ore block */
-	public static final Block DEEPSLATE_LIFE_CRYSTAL_ORE = new Block(FabricBlockSettings.create().strength(4.5f, 4.0f));
+	public static final Block DEEPSLATE_LIFE_CRYSTAL_ORE = new Block(Block.Settings.create().strength(4.5f, 4.0f));
 
 	// Placed feature registry keys
 	public static final RegistryKey<PlacedFeature> LIFE_CRYSTAL_ORE_PLACED_KEY = RegistryKey
-			.of(RegistryKeys.PLACED_FEATURE, new Identifier(MOD_ID, "ore_life_crystal"));
+			.of(RegistryKeys.PLACED_FEATURE, Identifier.of(MOD_ID, "ore_life_crystal"));
 	public static final RegistryKey<PlacedFeature> LIFE_CRYSTAL_ORE_BURIED_PLACED_KEY = RegistryKey
-			.of(RegistryKeys.PLACED_FEATURE, new Identifier(MOD_ID, "ore_life_crystal_buried"));
+			.of(RegistryKeys.PLACED_FEATURE, Identifier.of(MOD_ID, "ore_life_crystal_buried"));
 	public static final RegistryKey<PlacedFeature> LIFE_CRYSTAL_ORE_LARGE_PLACED_KEY = RegistryKey
-			.of(RegistryKeys.PLACED_FEATURE, new Identifier(MOD_ID, "ore_life_crystal_large"));
+			.of(RegistryKeys.PLACED_FEATURE, Identifier.of(MOD_ID, "ore_life_crystal_large"));
 
 	/** Item group */
 	public static final ItemGroup MAIN_GROUP = FabricItemGroup.builder()
@@ -79,7 +78,7 @@ public class LifeCrystals implements ModInitializer {
 			.build();
 
 	// Loot tables
-	final List<Identifier> LOOT_TABLE_IDS = List.of(
+	final List<RegistryKey<LootTable>> LOOT_TABLE_IDS = List.of(
 			LootTables.ABANDONED_MINESHAFT_CHEST,
 			LootTables.ANCIENT_CITY_CHEST,
 			LootTables.BURIED_TREASURE_CHEST,
@@ -95,20 +94,20 @@ public class LifeCrystals implements ModInitializer {
 		Config.setup();
 
 		// Register items
-		Registry.register(Registries.ITEM, new Identifier(MOD_ID, "life_crystal"), LIFE_CRYSTAL);
-		Registry.register(Registries.ITEM, new Identifier(MOD_ID, "life_crystal_shard"), LIFE_CRYSTAL_SHARD);
-		Registry.register(Registries.ITEM, new Identifier(MOD_ID, "life_crystal_ore"),
-				new BlockItem(LIFE_CRYSTAL_ORE, new FabricItemSettings()));
-		Registry.register(Registries.ITEM, new Identifier(MOD_ID, "deepslate_life_crystal_ore"),
-				new BlockItem(DEEPSLATE_LIFE_CRYSTAL_ORE, new FabricItemSettings()));
+		Registry.register(Registries.ITEM, Identifier.of(MOD_ID, "life_crystal"), LIFE_CRYSTAL);
+		Registry.register(Registries.ITEM, Identifier.of(MOD_ID, "life_crystal_shard"), LIFE_CRYSTAL_SHARD);
+		Registry.register(Registries.ITEM, Identifier.of(MOD_ID, "life_crystal_ore"),
+				new BlockItem(LIFE_CRYSTAL_ORE, new Item.Settings()));
+		Registry.register(Registries.ITEM, Identifier.of(MOD_ID, "deepslate_life_crystal_ore"),
+				new BlockItem(DEEPSLATE_LIFE_CRYSTAL_ORE, new Item.Settings()));
 
 		// Register blocks
-		Registry.register(Registries.BLOCK, new Identifier(MOD_ID, "life_crystal_ore"), LIFE_CRYSTAL_ORE);
-		Registry.register(Registries.BLOCK, new Identifier(MOD_ID, "deepslate_life_crystal_ore"),
+		Registry.register(Registries.BLOCK, Identifier.of(MOD_ID, "life_crystal_ore"), LIFE_CRYSTAL_ORE);
+		Registry.register(Registries.BLOCK, Identifier.of(MOD_ID, "deepslate_life_crystal_ore"),
 				DEEPSLATE_LIFE_CRYSTAL_ORE);
 
 		// Register item group
-		Registry.register(Registries.ITEM_GROUP, new Identifier(MOD_ID, "main_group"), MAIN_GROUP);
+		Registry.register(Registries.ITEM_GROUP, Identifier.of(MOD_ID, "main_group"), MAIN_GROUP);
 
 		// Register placed keys
 		BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Feature.UNDERGROUND_ORES,
@@ -124,41 +123,39 @@ public class LifeCrystals implements ModInitializer {
 			if (!(entity instanceof PlayerEntity player))
 				return;
 
-			// Get state
-			final HealthState state = HealthState.getServerState(world.getServer());
+			var attr = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
 
-			// Set player to base health if new player
-			if (!state.maxHealth.containsKey(player.getUuid())) {
+			// Set player to base health if new player (has no modifier)
+			if (!attr.hasModifier(HEALTH_MODIFIER_ID)) {
 				final var health = Config.DATA.baseHealth;
 
-				// Update state
-				state.maxHealth.put(player.getUuid(), health);
-				state.markDirty();
-
-				player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH)
-						.addPersistentModifier(new EntityAttributeModifier(HEALTH_MODIFIER_NAME, health - 20,
-								Operation.ADDITION));
+				EntityAttributeModifier modifier = new EntityAttributeModifier(HEALTH_MODIFIER_ID, health - 20,
+						Operation.ADD_VALUE);
+				attr.addPersistentModifier(modifier);
 				player.setHealth(health);
 			}
 		});
 
 		// Called when player respawns
 		ServerPlayerEvents.COPY_FROM.register(((oldPlayer, newPlayer, arg2) -> {
-			// Get state
-			final HealthState state = HealthState.getServerState(newPlayer.getServer());
+			var oldAttr = oldPlayer.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
 
-			// Set player health
-			final int maxHealth = state.getMaxHealth(newPlayer);
-			newPlayer.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).addPersistentModifier(
-					new EntityAttributeModifier(HEALTH_MODIFIER_NAME, maxHealth - 20, Operation.ADDITION));
-			newPlayer.setHealth(maxHealth);
+			// Set new player modifier
+			if (oldAttr.hasModifier(HEALTH_MODIFIER_ID)) {
+				final var oldModifier = oldAttr.getModifier(HEALTH_MODIFIER_ID);
+				int maxHealth = (int) oldModifier.value() + 20;
+
+				// Use "add" because the new player will not have any attributes
+				newPlayer.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).addPersistentModifier(oldModifier);
+				newPlayer.setHealth(maxHealth);
+			}
 		}));
 
 		// Add to loot tables
-		LootTableEvents.MODIFY.register((resourceManager, lootManager, id, tableBuilder, source) -> {
+		LootTableEvents.MODIFY.register((key, tableBuilder, source) -> {
 			float lootChance = Config.DATA.lootChance;
 
-			if (source.isBuiltin() && Config.DATA.addChestLoot && LOOT_TABLE_IDS.contains(id)) {
+			if (source.isBuiltin() && Config.DATA.addChestLoot && LOOT_TABLE_IDS.contains(key)) {
 				LootPool.Builder poolBuilder = LootPool.builder()
 						.rolls(BinomialLootNumberProvider.create(1, lootChance))
 						.with(ItemEntry.builder(LIFE_CRYSTAL_SHARD).weight(4)

@@ -1,7 +1,6 @@
 package minigee.life_crystals.items;
 
 import minigee.life_crystals.Config;
-import minigee.life_crystals.HealthState;
 import minigee.life_crystals.LifeCrystals;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -27,10 +26,14 @@ public class LifeCrystal extends Item {
 		final var stack = user.getStackInHand(hand);
 		if (world.isClient)
 			return TypedActionResult.fail(stack);
+			
+		// Increase hearts by adding an attribute modifier (so it doesn't interfere with
+		// other max health modifiers hopefully)
+		final var attr = user.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
 
-		// Get health state
-		final HealthState state = HealthState.getServerState(world.getServer());
-		int maxHealth = state.getMaxHealth(user);
+		// Get max health (use default base health if no modifier exists)
+		boolean hasModifier = attr.hasModifier(LifeCrystals.HEALTH_MODIFIER_ID);
+		int maxHealth = hasModifier ? (int) attr.getModifier(LifeCrystals.HEALTH_MODIFIER_ID).value() + 20 : Config.DATA.baseHealth;
 
 		// Check if at max allowable health
 		if (maxHealth >= Config.DATA.maxHealth) {
@@ -39,31 +42,20 @@ public class LifeCrystal extends Item {
 		}
 
 		// Play sound
-		user.playSound(SoundEvents.BLOCK_AMETHYST_BLOCK_BREAK, SoundCategory.PLAYERS, 1.0f, 1.0f);
+		user.playSoundToPlayer(SoundEvents.BLOCK_AMETHYST_BLOCK_BREAK, SoundCategory.PLAYERS, 1.0f, 1.0f);
 
 		// Decrement stack
 		stack.decrement(1);
+		
+		// Increment max health
+		int increment = Math.min(Config.DATA.healthIncrement, Config.DATA.maxHealth - maxHealth);
+		maxHealth += increment;
+		// Calculate modifier value
+		int modifierValue = maxHealth - 20;
 
-		// Increase hearts by adding an attribute modifier (so it doesn't interfere with
-		// other max health modifiers hopefully)
-		final var attr = user.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-
-		// Remove all modifiers from this mod
-		final var modifiers = attr.getModifiers();
-		modifiers.forEach((modifier) -> {
-			if (modifier.getName().equals(LifeCrystals.HEALTH_MODIFIER_NAME))
-				attr.removeModifier(modifier.getId());
-		});
-
-		// Apply modifier as the difference between the target max health and the
-		// default max health
-		maxHealth += Config.DATA.healthIncrement;
-		attr.addPersistentModifier(
-				new EntityAttributeModifier(LifeCrystals.HEALTH_MODIFIER_NAME, maxHealth - 20, Operation.ADDITION));
-
-		// Save state
-		state.maxHealth.put(user.getUuid(), maxHealth);
-		state.markDirty();
+		// Apply new modifier value
+		EntityAttributeModifier modifier = new EntityAttributeModifier(LifeCrystals.HEALTH_MODIFIER_ID, modifierValue, Operation.ADD_VALUE);
+		attr.overwritePersistentModifier(modifier);
 
 		return TypedActionResult.success(stack);
 	}

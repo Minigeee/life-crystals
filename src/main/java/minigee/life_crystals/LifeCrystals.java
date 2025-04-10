@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributeModifier.Operation;
@@ -16,16 +17,12 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.loot.LootPool;
 import net.minecraft.loot.LootTable;
 import net.minecraft.loot.LootTables;
 import net.minecraft.loot.entry.ItemEntry;
-import net.minecraft.loot.function.LimitCountLootFunction;
-import net.minecraft.loot.function.LootFunction;
 import net.minecraft.loot.function.SetCountLootFunction;
 import net.minecraft.loot.provider.number.BinomialLootNumberProvider;
-import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
 import net.minecraft.loot.provider.number.UniformLootNumberProvider;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -53,9 +50,9 @@ public class LifeCrystals implements ModInitializer {
 	public static final LifeCrystal LIFE_CRYSTAL = new LifeCrystal(new Item.Settings().rarity(Rarity.RARE));
 
 	/** Ore block */
-	public static final Block LIFE_CRYSTAL_ORE = new Block(Block.Settings.create().strength(3.0f, 4.0f));
+	public static final Block LIFE_CRYSTAL_ORE = new Block(AbstractBlock.Settings.create().strength(3.0f, 4.0f));
 	/** Deepslate ore block */
-	public static final Block DEEPSLATE_LIFE_CRYSTAL_ORE = new Block(Block.Settings.create().strength(4.5f, 4.0f));
+	public static final Block DEEPSLATE_LIFE_CRYSTAL_ORE = new Block(AbstractBlock.Settings.create().strength(4.5f, 4.0f));
 
 	// Placed feature registry keys
 	public static final RegistryKey<PlacedFeature> LIFE_CRYSTAL_ORE_PLACED_KEY = RegistryKey
@@ -86,7 +83,9 @@ public class LifeCrystals implements ModInitializer {
 			LootTables.END_CITY_TREASURE_CHEST,
 			LootTables.JUNGLE_TEMPLE_CHEST,
 			LootTables.SIMPLE_DUNGEON_CHEST,
-			LootTables.WOODLAND_MANSION_CHEST);
+			LootTables.WOODLAND_MANSION_CHEST,
+			LootTables.TRIAL_CHAMBERS_REWARD_RARE_CHEST,
+			LootTables.TRIAL_CHAMBERS_REWARD_OMINOUS_RARE_CHEST);
 
 	@Override
 	public void onInitialize() {
